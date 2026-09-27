@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hackeando o Algoritmo 3.2</title>
+    <title>Hackeando o Algoritmo 2.3</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; margin: 0; padding: 20px; }
         .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -72,15 +72,16 @@
 
     <div id="mensagem-sucesso" class="hidden">
         <h2>🎉 Parabéns, Engenheiros!</h2>
-        <p>Todas as missões foram concluídas e salvas no banco de dados.</p>
+        <p>Todas as missões foram concluídas e salvas na planilha central.</p>
         <button onclick="limparEReiniciar()">Fazer nova análise (Outro Grupo)</button>
     </div>
 </div>
 
-<!-- O TRUQUE MESTRE: Um iframe escondido para receber a resposta do Google sem sair da página -->
+<!-- ==========================================
+     FORMULÁRIO OCULTO (Não sofre bloqueio de navegador)
+     ========================================== -->
 <iframe name="iframe_oculto" id="iframe_oculto" style="display:none;"></iframe>
 
-<!-- O Formulário Raiz que não sofre bloqueio do navegador -->
 <form id="form_invisivel" method="POST" target="iframe_oculto" style="display:none;">
     <input type="hidden" name="grupo" id="form_grupo">
     <input type="hidden" name="integrantes" id="form_integrantes">
@@ -92,10 +93,9 @@
 </form>
 
 <script>
-    // ⚠️ ATENÇÃO: COLE O SEU NOVO LINK AQUI DENTRO DAS ASPAS:
-    var PLANILHA_URL = "https://script.google.com/macros/s/AKfycbzmbpfNj8REaYBC1Z-kuB7QVjQX2BoLFzvPHhIftdRvsaQ1xPuXPiXJWo4hkVrMu32yeA/exec";
+    // SEU NOVO LINK AQUI:
+    var PLANILHA_URL = "https://script.google.com/macros/s/AKfycbwH_fimqY5WzOBcn8TdUy1BVLkRD5Thbw7R39hp4isG2yRE-H2EgGQSYK8BGW3LhL83TQ/exec";
 
-    // Informa ao formulário para onde ele deve ir
     document.getElementById("form_invisivel").action = PLANILHA_URL;
 
     var configFases = {
@@ -202,6 +202,7 @@
         var containerCampos = document.getElementById("campos-dinamicos");
         containerCampos.innerHTML = "";
         
+        // Renderiza apenas os campos necessários na tela (sem tentar forçar um quarto campo inexistente)
         config.campos.forEach(function(campo, index) {
             var htmlCampo = '<div class="form-group">' +
                             '<label>' + campo.label + '</label>' +
@@ -211,10 +212,14 @@
         });
     }
 
-    // Pega o valor se o campo existir, senão retorna vazio
+    // Função de segurança blindada: Se a pergunta 4 não existir, devolve "" sem quebrar o código
     function pegarValorSeguro(id) {
         var campo = document.getElementById(id);
-        return campo ? campo.value : "";
+        if (campo) {
+            return campo.value;
+        } else {
+            return "";
+        }
     }
 
     function enviarDadosEAvancar() {
@@ -222,7 +227,7 @@
         btn.innerText = "Gravando na planilha... Aguarde";
         btn.disabled = true;
         
-        // 1. Preenche os campos do formulário invisível com as respostas da tela
+        // 1. Preenche o formulário invisível com segurança
         document.getElementById("form_grupo").value = dadosAtuais.grupo;
         document.getElementById("form_integrantes").value = dadosAtuais.integrantes;
         document.getElementById("form_fase").value = configFases[dadosAtuais.fase].titulo;
@@ -231,10 +236,10 @@
         document.getElementById("form_r3").value = pegarValorSeguro("resposta_3");
         document.getElementById("form_r4").value = pegarValorSeguro("resposta_4");
 
-        // 2. Dispara o envio real (como é formulário nativo, o navegador nunca bloqueia)
+        // 2. Dispara o formulário oculto
         document.getElementById("form_invisivel").submit();
 
-        // 3. Aguarda 2 segundos para o Google processar e avança de fase
+        // 3. Aguarda um tempo de segurança (2 segundos) para que o Google grave os dados e avança de fase
         setTimeout(function() {
             dadosAtuais.fase++;
             localStorage.setItem('anatomia_fase', dadosAtuais.fase);
