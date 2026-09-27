@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hackeando o Algoritmo 2.3</title>
+    <title>Hackeando o Algoritmo1.2</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; margin: 0; padding: 20px; }
         .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -21,10 +21,8 @@
         
         .hidden { display: none; }
         #mensagem-sucesso { text-align: center; color: #27ae60; padding: 30px; background: #eafaf1; border-radius: 5px;}
-        
         .btn-secundario { background-color: #7f8c8d; margin-top: 10px; padding: 10px; font-size: 14px; }
         .btn-secundario:hover { background-color: #95a5a6; }
-        
         .desc-box { background-color: #fdfefe; border-left: 4px solid #f39c12; padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #555; white-space: pre-wrap; font-style: italic;}
     </style>
 </head>
@@ -72,31 +70,14 @@
 
     <div id="mensagem-sucesso" class="hidden">
         <h2>🎉 Parabéns, Engenheiros!</h2>
-        <p>Todas as missões foram concluídas e salvas na planilha central.</p>
+        <p>Todas as missões foram concluídas e gravadas no banco de dados.</p>
         <button onclick="limparEReiniciar()">Fazer nova análise (Outro Grupo)</button>
     </div>
 </div>
 
-<!-- ==========================================
-     FORMULÁRIO OCULTO (Não sofre bloqueio de navegador)
-     ========================================== -->
-<iframe name="iframe_oculto" id="iframe_oculto" style="display:none;"></iframe>
-
-<form id="form_invisivel" method="POST" target="iframe_oculto" style="display:none;">
-    <input type="hidden" name="grupo" id="form_grupo">
-    <input type="hidden" name="integrantes" id="form_integrantes">
-    <input type="hidden" name="fase" id="form_fase">
-    <input type="hidden" name="resposta_1" id="form_r1">
-    <input type="hidden" name="resposta_2" id="form_r2">
-    <input type="hidden" name="resposta_3" id="form_r3">
-    <input type="hidden" name="resposta_4" id="form_r4">
-</form>
-
 <script>
-    // SEU NOVO LINK AQUI:
-    var PLANILHA_URL = "https://script.google.com/macros/s/AKfycbwH_fimqY5WzOBcn8TdUy1BVLkRD5Thbw7R39hp4isG2yRE-H2EgGQSYK8BGW3LhL83TQ/exec";
-
-    document.getElementById("form_invisivel").action = PLANILHA_URL;
+    // ✅ SEU NOVO LINK FUNCIONAL AQUI:
+    var PLANILHA_URL = "https://script.google.com/macros/s/AKfycbyDtthxPY8TNESH4bSM3m6SuuSxyk6LMpzgp65lVcU7_TxmAmPpJXtiwo8xjRU83FGtEg/exec";
 
     var configFases = {
         1: {
@@ -202,7 +183,6 @@
         var containerCampos = document.getElementById("campos-dinamicos");
         containerCampos.innerHTML = "";
         
-        // Renderiza apenas os campos necessários na tela (sem tentar forçar um quarto campo inexistente)
         config.campos.forEach(function(campo, index) {
             var htmlCampo = '<div class="form-group">' +
                             '<label>' + campo.label + '</label>' +
@@ -212,35 +192,33 @@
         });
     }
 
-    // Função de segurança blindada: Se a pergunta 4 não existir, devolve "" sem quebrar o código
     function pegarValorSeguro(id) {
         var campo = document.getElementById(id);
-        if (campo) {
-            return campo.value;
-        } else {
-            return "";
-        }
+        return campo ? campo.value : "";
     }
 
     function enviarDadosEAvancar() {
         var btn = document.getElementById("btn-enviar");
-        btn.innerText = "Gravando na planilha... Aguarde";
+        btn.innerText = "Gravando no sistema... Aguarde";
         btn.disabled = true;
         
-        // 1. Preenche o formulário invisível com segurança
-        document.getElementById("form_grupo").value = dadosAtuais.grupo;
-        document.getElementById("form_integrantes").value = dadosAtuais.integrantes;
-        document.getElementById("form_fase").value = configFases[dadosAtuais.fase].titulo;
-        document.getElementById("form_r1").value = pegarValorSeguro("resposta_1");
-        document.getElementById("form_r2").value = pegarValorSeguro("resposta_2");
-        document.getElementById("form_r3").value = pegarValorSeguro("resposta_3");
-        document.getElementById("form_r4").value = pegarValorSeguro("resposta_4");
+        // Empacota os dados de forma nativa e inviolável
+        var formData = new FormData();
+        formData.append("grupo", dadosAtuais.grupo);
+        formData.append("integrantes", dadosAtuais.integrantes);
+        formData.append("fase", configFases[dadosAtuais.fase].titulo);
+        formData.append("resposta_1", pegarValorSeguro("resposta_1"));
+        formData.append("resposta_2", pegarValorSeguro("resposta_2"));
+        formData.append("resposta_3", pegarValorSeguro("resposta_3"));
+        formData.append("resposta_4", pegarValorSeguro("resposta_4"));
 
-        // 2. Dispara o formulário oculto
-        document.getElementById("form_invisivel").submit();
-
-        // 3. Aguarda um tempo de segurança (2 segundos) para que o Google grave os dados e avança de fase
-        setTimeout(function() {
+        // Dispara em modo invisível (no-cors) para contornar qualquer barreira
+        fetch(PLANILHA_URL, {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors'
+        }).then(function() {
+            // Avança para a próxima etapa apenas quando o envio for feito
             dadosAtuais.fase++;
             localStorage.setItem('anatomia_fase', dadosAtuais.fase);
             window.scrollTo(0, 0);
@@ -251,7 +229,11 @@
             } else {
                 carregarInterfaceDaFase();
             }
-        }, 2000);
+        }).catch(function(error) {
+            alert("⚠️ Falha na conexão. Tente novamente.");
+            btn.disabled = false;
+            btn.innerText = dadosAtuais.fase === 5 ? "Finalizar Missão e Enviar!" : "Enviar e Avançar para a Fase " + (dadosAtuais.fase + 1);
+        });
     }
 
     function voltarParaLogin() {
