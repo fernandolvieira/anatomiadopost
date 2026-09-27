@@ -33,9 +33,9 @@
 <div class="container">
     <h1>🧠 Hackeando o Algoritmo</h1>
     
-    <!-- Tela 1: Identificação (Aparece no início ou para recuperar progresso) -->
+    <!-- Tela 1: Identificação -->
     <div id="tela-login">
-        <p style="text-align:center;">Identifiquem a equipe. Se vocês fecharam o site sem querer, basta selecionar a fase de onde pararam.</p>
+        <p style="text-align:center;">Identifiquem a equipe. Se fecharem a aba, basta selecionar a fase de onde pararam.</p>
         
         <div class="form-group">
             <label>Nome do Grupo:</label>
@@ -58,7 +58,7 @@
         <button id="btn-iniciar" onclick="iniciarOuRetomar()">Iniciar Missão</button>
     </div>
 
-    <!-- Tela 2: A Missão (Carregada Dinamicamente) -->
+    <!-- Tela 2: A Missão -->
     <div id="tela-missao" class="hidden">
         
         <div class="progress-bar-container">
@@ -77,72 +77,70 @@
     <!-- Tela 3: Sucesso Final -->
     <div id="mensagem-sucesso" class="hidden">
         <h2>🎉 Parabéns, Engenheiros!</h2>
-        <p>Todas as 5 missões foram concluídas e enviadas para o servidor central com sucesso.</p>
+        <p>Todas as 5 missões foram concluídas e salvas no banco de dados.</p>
         <p>Aguardem as instruções do professor.</p>
         <button onclick="limparEReiniciar()">Fazer nova análise (Outro grupo)</button>
     </div>
 </div>
 
 <script>
-    const PLANILHA_URL = "https://script.google.com/macros/s/AKfycbzqRx0Zv-7hCUXhnDtcK7sfbjbORDkzchcUAFxAlJFbvhbdrbY6O_b2955pYPrrDMePeQ/exec";
+    // Cole aqui o seu link caso tenha gerado uma NOVA implantação no Apps Script
+    const PLANILHA_URL = "https://script.google.com/macros/s/AKfycbyPYOd1wvGrY22jWyLh9kkM6lg_6oDyJRyVvCfgkNmlyhfJUMzbawVZqlgJUsZR8DJQsw/exec";
 
-    // Estrutura atualizada com os cenários e temas pré-definidos
     const configFases = {
         1: {
             titulo: "Fase 1: Laboratório de Clickbait",
             desc: "O TÍTULO CHATO ORIGINAL:\n'Aviso: A prefeitura recomenda beber mais água devido à baixa umidade do ar.'\n\nA missão de vocês é reescrever esse título inofensivo e transformá-lo no post mais apelativo e viral possível, usando a anatomia do engajamento.",
             campos: [
                 { label: "1. Qual o seu novo Título Clickbait?", linhas: 2 },
-                { label: "2. Qual emoção vocês tentaram engatilhar (Raiva, Medo, Curiosidade, Urgência)?", linhas: 1 },
+                { label: "2. Qual emoção tentaram engatilhar (Raiva, Medo, Curiosidade, Urgência)?", linhas: 1 },
                 { label: "3. O que teria na Imagem/Vídeo para prender a atenção?", linhas: 2 }
             ]
         },
         2: {
             titulo: "Fase 2: Agência de Fact-Checking",
-            desc: "CASO EM ANÁLISE: O caso da 'Grávida de Taubaté' (2012).\nUma mulher usou uma barriga redonda de espuma e silicone, pintada e com umbigo falso, e foi a diversos programas de TV jurando estar grávida de quadrigêmeas. O Brasil inteiro acreditou e ela ganhou fraldas e dinheiro, até ser desmascarada.\n\nDesconstruam como o sensacionalismo ajudou a propagar isso.",
+            desc: "CASO EM ANÁLISE: O caso da 'Grávida de Taubaté' (2012).\nUma mulher usou uma barriga de espuma e foi à TV jurando estar grávida de quadrigêmeas. O Brasil inteiro acreditou e ela ganhou prêmios, até ser desmascarada.\n\nDesconstruam como o sensacionalismo ajudou a propagar isso.",
             campos: [
                 { label: "1. Por que essa história viralizou tão rápido na época?", linhas: 2 },
-                { label: "2. Qual tática de manipulação emocional (da anatomia do post) foi usada para enganar as pessoas e a mídia?", linhas: 2 },
-                { label: "3. Se fosse hoje, como as redes sociais iriam impulsionar (ou desmascarar) esse caso?", linhas: 2 }
+                { label: "2. Qual tática de manipulação emocional foi usada para enganar as pessoas?", linhas: 2 },
+                { label: "3. Se fosse hoje, como o algoritmo das redes iria agir com esse caso?", linhas: 2 }
             ]
         },
         3: {
             titulo: "Fase 3: Teste A/B",
             desc: "O TEMA: A Feira de Ciências da Escola que vai acontecer neste sábado.\n\nVocês precisam criar duas versões de divulgação para competir pela atenção no algoritmo.",
             campos: [
-                { label: "1. Texto do Post A (Versão Ética, Informativa, Direta e um pouco chata)", linhas: 3 },
-                { label: "2. Texto do Post B (Versão Viral, Apelativa, Polêmica ou Clickbait)", linhas: 3 },
-                { label: "3. Explique detalhadamente: Por que o Algoritmo inevitavelmente preferiria impulsionar o Post B?", linhas: 2 }
+                { label: "1. Texto do Post A (Versão Ética, Informativa e chata)", linhas: 3 },
+                { label: "2. Texto do Post B (Versão Viral, Apelativa ou Clickbait)", linhas: 3 },
+                { label: "3. Explique: Por que o Algoritmo impulsionaria o Post B?", linhas: 2 }
             ]
         },
         4: {
             titulo: "Fase 4: Auditoria da Bolha",
-            desc: "MISSÃO: Abram o TikTok, Reels ou Shorts no celular de alguém do grupo. Rolem o feed normalmente e anotem rigorosamente os 10 primeiros posts que aparecerem.",
+            desc: "MISSÃO: Abram o TikTok, Reels ou Shorts no celular de alguém do grupo. Rolem o feed e anotem os 10 primeiros posts que aparecerem.",
             campos: [
                 { label: "1. Qual plataforma estão usando? (TikTok, Reels, etc)", linhas: 1 },
-                { label: "2. Liste o @ do criador e o Tema dos 10 primeiros posts.\n(Exemplo: 1. @Zezinho - Games | 2. @Maria - Maquiagem...)", linhas: 8 },
-                { label: "3. Olhando para essa lista, qual padrão de interesses e qual emoção principal o algoritmo acha que o dono do celular tem?", linhas: 3 }
+                { label: "2. Liste o @ do criador e o Tema dos 10 primeiros posts.\n(Ex: 1. @Zezinho - Games | 2. @Maria - Maquiagem...)", linhas: 8 },
+                { label: "3. Olhando a lista, qual perfil de interesses o algoritmo acha que o dono do celular tem?", linhas: 3 }
             ]
         },
         5: {
             titulo: "Fase 5: Mapa da Toxicidade",
-            desc: "CENÁRIO EM UMA PANELA DE DISCORD:\nUm jogador novato entra no servidor da turma para jogar Valorant, mas não sabe as regras direito e joga mal. Dois veteranos de uma 'panela' (grupo fechado) começam a xingá-lo no chat de voz e fazem figurinhas e memes humilhando o novato no chat de texto. Outros membros dão upvotes (reações de risada) nos memes. Os moderadores estão offline. O novato desinstala o jogo e sai do servidor.",
+            desc: "CENÁRIO EM UM DISCORD:\nUm novato entra no servidor para jogar, mas joga mal. Dois veteranos de uma 'panela' começam a xingá-lo no chat de voz e fazem figurinhas humilhando o novato. Outros membros dão upvotes (reações de risada). O novato desinstala o jogo e sai.",
             campos: [
-                { label: "1. Qual foi o gatilho da toxicidade? Por que a 'panela' se sentiu à vontade para humilhar o novato?", linhas: 2 },
-                { label: "2. Como as ferramentas do app (anonimato, reações rápidas de emoji, cultura de grupo) pioraram o problema?", linhas: 2 },
-                { label: "3. Proponham 2 regras práticas no design do servidor (cargos, automoderação, limites) para evitar que isso se repita.", linhas: 3 }
+                { label: "1. Qual foi o gatilho da toxicidade? Por que a 'panela' se sentiu à vontade?", linhas: 2 },
+                { label: "2. Como as ferramentas do app (anonimato, reações rápidas) pioraram tudo?", linhas: 2 },
+                { label: "3. Proponham 2 regras práticas no design do servidor para evitar isso.", linhas: 3 }
             ]
         }
     };
 
     let dadosAtuais = { grupo: "", integrantes: "", fase: 1 };
 
-    // Ao carregar a página, checa se tem progresso salvo no navegador
     window.onload = function() {
         if(localStorage.getItem('anatomia_grupo')) {
             document.getElementById('input-grupo').value = localStorage.getItem('anatomia_grupo');
             document.getElementById('input-integrantes').value = localStorage.getItem('anatomia_integrantes');
-            
             let faseSalva = parseInt(localStorage.getItem('anatomia_fase'));
             if(faseSalva >= 1 && faseSalva <= 5) {
                 document.getElementById('select-fase').value = faseSalva;
@@ -159,11 +157,10 @@
         const faseSelecionada = parseInt(document.getElementById("select-fase").value);
 
         if(!grupo || !integrantes) {
-            alert("⚠️ Por favor, preencha o nome do grupo e integrantes para registrar as respostas.");
+            alert("⚠️ Preencha o nome do grupo e integrantes.");
             return;
         }
 
-        // Salva os dados localmente
         dadosAtuais = { grupo, integrantes, fase: faseSelecionada };
         localStorage.setItem('anatomia_grupo', grupo);
         localStorage.setItem('anatomia_integrantes', integrantes);
@@ -177,13 +174,10 @@
         document.getElementById("tela-missao").classList.remove("hidden");
         
         const config = configFases[dadosAtuais.fase];
-        
-        // Atualiza UI
         document.getElementById("titulo-missao").innerText = config.titulo;
         document.getElementById("desc-missao").innerText = config.desc;
         document.getElementById("barra-progresso").style.width = (dadosAtuais.fase * 20) + "%";
 
-        // Muda texto do botão na última fase
         const btnEnviar = document.getElementById("btn-enviar");
         if(dadosAtuais.fase === 5) {
             btnEnviar.innerText = "Finalizar Missão e Enviar!";
@@ -194,7 +188,6 @@
         }
         btnEnviar.disabled = false;
 
-        // Gera os campos dinamicamente
         const containerCampos = document.getElementById("campos-dinamicos");
         containerCampos.innerHTML = "";
         
@@ -202,7 +195,7 @@
             containerCampos.innerHTML += `
                 <div class="form-group">
                     <label>${campo.label}</label>
-                    <textarea id="resposta_${index + 1}" rows="${campo.linhas}" placeholder="Digite a resposta da equipe aqui..."></textarea>
+                    <textarea id="resposta_${index + 1}" rows="${campo.linhas}" placeholder="Digite a resposta aqui..."></textarea>
                 </div>
             `;
         });
@@ -210,44 +203,37 @@
 
     function enviarDadosEAvancar() {
         const btn = document.getElementById("btn-enviar");
-        btn.innerText = "Transmitindo dados ao servidor... Aguarde";
+        btn.innerText = "Salvando na planilha... Aguarde";
         btn.disabled = true;
         
-        // Monta o pacote de dados a ser enviado à planilha
-        const payload = {
-            grupo: dadosAtuais.grupo,
-            integrantes: dadosAtuais.integrantes,
-            fase: configFases[dadosAtuais.fase].titulo,
-            resposta_1: document.getElementById("resposta_1")?.value || "",
-            resposta_2: document.getElementById("resposta_2")?.value || "",
-            resposta_3: document.getElementById("resposta_3")?.value || "",
-            resposta_4: document.getElementById("resposta_4")?.value || "" // Backup
-        };
+        // Novo método: Criando um FormData estruturado (Não gera erro de CORS)
+        const payload = new FormData();
+        payload.append("grupo", dadosAtuais.grupo);
+        payload.append("integrantes", dadosAtuais.integrantes);
+        payload.append("fase", configFases[dadosAtuais.fase].titulo);
+        payload.append("resposta_1", document.getElementById("resposta_1")?.value || "");
+        payload.append("resposta_2", document.getElementById("resposta_2")?.value || "");
+        payload.append("resposta_3", document.getElementById("resposta_3")?.value || "");
+        payload.append("resposta_4", document.getElementById("resposta_4")?.value || "");
 
-        // Envia para o Google Apps Script
+        // Disparo com modo no-cors para ignorar redirecionamentos do Google
         fetch(PLANILHA_URL, {
             method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+            body: payload,
+            mode: "no-cors"
         }).then(() => {
-            // Avança a fase
             dadosAtuais.fase++;
             localStorage.setItem('anatomia_fase', dadosAtuais.fase);
-            
-            // Rola para o topo
             window.scrollTo(0, 0);
 
             if (dadosAtuais.fase > 5) {
-                // Terminou tudo
                 document.getElementById("tela-missao").classList.add("hidden");
                 document.getElementById("mensagem-sucesso").classList.remove("hidden");
             } else {
-                // Carrega a próxima fase automaticamente
                 carregarInterfaceDaFase();
             }
         }).catch(err => {
-            alert("⚠️ Erro de conexão. Verifiquem a internet e tentem novamente.");
+            alert("⚠️ Erro de conexão. Tentem enviar novamente.");
             btn.innerText = dadosAtuais.fase === 5 ? "Finalizar Missão e Enviar!" : "Enviar e Avançar para a Fase " + (dadosAtuais.fase + 1);
             btn.disabled = false;
         });
@@ -256,8 +242,6 @@
     function voltarParaLogin() {
         document.getElementById("tela-missao").classList.add("hidden");
         document.getElementById("tela-login").classList.remove("hidden");
-        
-        // Atualiza a select box com a fase atual salva para não perder progresso
         document.getElementById("select-fase").value = dadosAtuais.fase;
     }
 
