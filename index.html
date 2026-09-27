@@ -33,7 +33,6 @@
 <div class="container">
     <h1>🧠 Hackeando o Algoritmo</h1>
     
-    <!-- Tela 1: Identificação -->
     <div id="tela-login">
         <p style="text-align:center;">Identifiquem a equipe. Se fecharem a aba, basta selecionar a fase de onde pararam.</p>
         
@@ -58,23 +57,19 @@
         <button id="btn-iniciar" onclick="iniciarOuRetomar()">Iniciar Missão</button>
     </div>
 
-    <!-- Tela 2: A Missão -->
     <div id="tela-missao" class="hidden">
-        
         <div class="progress-bar-container">
             <div id="barra-progresso" class="progress-bar" style="width: 20%;"></div>
         </div>
         
         <h2 id="titulo-missao">Fase</h2>
         <div id="desc-missao" class="desc-box"></div>
-        
         <div id="campos-dinamicos"></div>
         
         <button id="btn-enviar" onclick="enviarDadosEAvancar()">Enviar e Avançar para a Próxima Fase</button>
         <button class="btn-secundario" onclick="voltarParaLogin()">Voltar / Editar Grupo</button>
     </div>
 
-    <!-- Tela 3: Sucesso Final -->
     <div id="mensagem-sucesso" class="hidden">
         <h2>🎉 Parabéns, Engenheiros!</h2>
         <p>Todas as 5 missões foram concluídas e salvas no banco de dados.</p>
@@ -84,8 +79,8 @@
 </div>
 
 <script>
-    // Cole aqui o seu link caso tenha gerado uma NOVA implantação no Apps Script
-    const PLANILHA_URL = "https://script.google.com/macros/s/AKfycbyPYOd1wvGrY22jWyLh9kkM6lg_6oDyJRyVvCfgkNmlyhfJUMzbawVZqlgJUsZR8DJQsw/exec";
+    // ⚠️ COLE O NOVO LINK AQUI DENTRO DAS ASPAS:
+    const PLANILHA_URL = "COLE_AQUI_O_SEU_NOVO_LINK_DA_NOVA_IMPLANTACAO";
 
     const configFases = {
         1: {
@@ -206,8 +201,8 @@
         btn.innerText = "Salvando na planilha... Aguarde";
         btn.disabled = true;
         
-        // Novo método: Criando um FormData estruturado (Não gera erro de CORS)
-        const payload = new FormData();
+        // Formato mais seguro para envio (URLSearchParams funciona nativamente com o Google)
+        const payload = new URLSearchParams();
         payload.append("grupo", dadosAtuais.grupo);
         payload.append("integrantes", dadosAtuais.integrantes);
         payload.append("fase", configFases[dadosAtuais.fase].titulo);
@@ -216,7 +211,6 @@
         payload.append("resposta_3", document.getElementById("resposta_3")?.value || "");
         payload.append("resposta_4", document.getElementById("resposta_4")?.value || "");
 
-        // Disparo com modo no-cors para ignorar redirecionamentos do Google
         fetch(PLANILHA_URL, {
             method: "POST",
             body: payload,
