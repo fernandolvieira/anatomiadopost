@@ -31,7 +31,7 @@
 <body>
 
 <div class="container">
-    <h1>🧠 Hackeando o Algoritmo</h1>
+    <h1>🧠 Hackeando o Algoritmo 2.0</h1>
     
     <div id="tela-login">
         <p style="text-align:center;">Identifiquem a equipe. Se fecharem a aba, basta selecionar a fase de onde pararam.</p>
@@ -79,8 +79,8 @@
 </div>
 
 <script>
-    // ⚠️ COLE O NOVO LINK AQUI DENTRO DAS ASPAS:
-    const PLANILHA_URL = "COLE_AQUI_O_SEU_NOVO_LINK_DA_NOVA_IMPLANTACAO";
+    // ⚠️ COLE O NOVO LINK GERADO NO APPS SCRIPT AQUI DENTRO DAS ASPAS:
+    const PLANILHA_URL = "COLE_SEU_LINK_AQUI";
 
     const configFases = {
         1: {
@@ -198,24 +198,30 @@
 
     function enviarDadosEAvancar() {
         const btn = document.getElementById("btn-enviar");
-        btn.innerText = "Salvando na planilha... Aguarde";
+        btn.innerText = "Gravando na planilha... Aguarde";
         btn.disabled = true;
         
-        // Formato mais seguro para envio (URLSearchParams funciona nativamente com o Google)
-        const payload = new URLSearchParams();
-        payload.append("grupo", dadosAtuais.grupo);
-        payload.append("integrantes", dadosAtuais.integrantes);
-        payload.append("fase", configFases[dadosAtuais.fase].titulo);
-        payload.append("resposta_1", document.getElementById("resposta_1")?.value || "");
-        payload.append("resposta_2", document.getElementById("resposta_2")?.value || "");
-        payload.append("resposta_3", document.getElementById("resposta_3")?.value || "");
-        payload.append("resposta_4", document.getElementById("resposta_4")?.value || "");
+        // Empacotamento em texto simples (Bypass de CORS)
+        const payload = {
+            grupo: dadosAtuais.grupo,
+            integrantes: dadosAtuais.integrantes,
+            fase: configFases[dadosAtuais.fase].titulo,
+            resposta_1: document.getElementById("resposta_1")?.value || "",
+            resposta_2: document.getElementById("resposta_2")?.value || "",
+            resposta_3: document.getElementById("resposta_3")?.value || "",
+            resposta_4: document.getElementById("resposta_4")?.value || ""
+        };
 
+        // Disparo para o Google como texto
         fetch(PLANILHA_URL, {
             method: "POST",
-            body: payload,
-            mode: "no-cors"
-        }).then(() => {
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            // A planilha recebeu, processou e liberou o avanço!
             dadosAtuais.fase++;
             localStorage.setItem('anatomia_fase', dadosAtuais.fase);
             window.scrollTo(0, 0);
@@ -226,8 +232,10 @@
             } else {
                 carregarInterfaceDaFase();
             }
-        }).catch(err => {
-            alert("⚠️ Erro de conexão. Tentem enviar novamente.");
+        })
+        .catch(err => {
+            console.error(err);
+            alert("⚠️ A conexão com a planilha falhou. Tente clicar em enviar novamente.");
             btn.innerText = dadosAtuais.fase === 5 ? "Finalizar Missão e Enviar!" : "Enviar e Avançar para a Fase " + (dadosAtuais.fase + 1);
             btn.disabled = false;
         });
