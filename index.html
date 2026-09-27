@@ -3,18 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratório: Anatomia do Post</title>
+    <title>Hackeando o Algoritmo</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; margin: 0; padding: 20px; }
         .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1, h2 { color: #2c3e50; text-align: center; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input[type="text"], textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { display: block; width: 100%; padding: 12px; background-color: #2980b9; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #34495e; }
+        input[type="text"], textarea, select { width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 5px; box-sizing: border-box; font-family: inherit; font-size: 15px;}
+        textarea { resize: vertical; }
+        button { display: block; width: 100%; padding: 14px; background-color: #2980b9; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 20px; }
         button:hover { background-color: #3498db; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        
+        .progress-bar-container { width: 100%; background-color: #ecf0f1; border-radius: 5px; margin-bottom: 20px; height: 10px; overflow: hidden;}
+        .progress-bar { height: 100%; background-color: #27ae60; transition: width 0.4s ease; }
+        
         .hidden { display: none; }
-        #mensagem-sucesso { text-align: center; color: #27ae60; font-weight: bold; margin-top: 20px; padding: 20px; background: #eafaf1; border-radius: 5px;}
+        #mensagem-sucesso { text-align: center; color: #27ae60; padding: 30px; background: #eafaf1; border-radius: 5px;}
+        
+        .btn-secundario { background-color: #7f8c8d; margin-top: 10px; padding: 10px; font-size: 14px; }
+        .btn-secundario:hover { background-color: #95a5a6; }
+        
+        .desc-box { background-color: #fdfefe; border-left: 4px solid #f39c12; padding: 15px; margin-bottom: 20px; border-radius: 4px; color: #555; white-space: pre-wrap; font-style: italic;}
     </style>
 </head>
 <body>
@@ -22,9 +33,10 @@
 <div class="container">
     <h1>🧠 Hackeando o Algoritmo</h1>
     
-    <!-- Tela 1: Identificação -->
+    <!-- Tela 1: Identificação (Aparece no início ou para recuperar progresso) -->
     <div id="tela-login">
-        <p style="text-align:center;">Bem-vindos à central de análise. Identifiquem sua equipe para começar a missão.</p>
+        <p style="text-align:center;">Identifiquem a equipe. Se vocês fecharam o site sem querer, basta selecionar a fase de onde pararam.</p>
+        
         <div class="form-group">
             <label>Nome do Grupo:</label>
             <input type="text" id="input-grupo" placeholder="Ex: Esquadrão Cyber">
@@ -34,7 +46,7 @@
             <input type="text" id="input-integrantes" placeholder="João, Maria e Pedro">
         </div>
         <div class="form-group">
-            <label>Selecione a Missão:</label>
+            <label>Qual fase vão fazer agora?</label>
             <select id="select-fase">
                 <option value="1">Fase 1: Laboratório de Clickbait</option>
                 <option value="2">Fase 2: Fact-Checking</option>
@@ -43,96 +55,165 @@
                 <option value="5">Fase 5: Mapa da Toxicidade</option>
             </select>
         </div>
-        <button onclick="iniciarMissao()">Iniciar Missão</button>
+        <button id="btn-iniciar" onclick="iniciarOuRetomar()">Iniciar Missão</button>
     </div>
 
-    <!-- Tela 2: A Missão (Gerada Dinamicamente) -->
+    <!-- Tela 2: A Missão (Carregada Dinamicamente) -->
     <div id="tela-missao" class="hidden">
+        
+        <div class="progress-bar-container">
+            <div id="barra-progresso" class="progress-bar" style="width: 20%;"></div>
+        </div>
+        
         <h2 id="titulo-missao">Fase</h2>
-        <p id="desc-missao"></p>
+        <div id="desc-missao" class="desc-box"></div>
         
         <div id="campos-dinamicos"></div>
         
-        <button id="btn-enviar" onclick="enviarDados()">Enviar Relatório para o Servidor</button>
+        <button id="btn-enviar" onclick="enviarDadosEAvancar()">Enviar e Avançar para a Próxima Fase</button>
+        <button class="btn-secundario" onclick="voltarParaLogin()">Voltar / Editar Grupo</button>
     </div>
 
-    <!-- Tela 3: Sucesso -->
+    <!-- Tela 3: Sucesso Final -->
     <div id="mensagem-sucesso" class="hidden">
-        <h3>🚀 Dados enviados com sucesso!</h3>
-        <p>Acesse a planilha da turma para ver os resultados.</p>
-        <button onclick="location.reload()">Fazer nova análise</button>
+        <h2>🎉 Parabéns, Engenheiros!</h2>
+        <p>Todas as 5 missões foram concluídas e enviadas para o servidor central com sucesso.</p>
+        <p>Aguardem as instruções do professor.</p>
+        <button onclick="limparEReiniciar()">Fazer nova análise (Outro grupo)</button>
     </div>
 </div>
 
 <script>
-    // Link do Apps Script configurado
     const PLANILHA_URL = "https://script.google.com/macros/s/AKfycbzqRx0Zv-7hCUXhnDtcK7sfbjbORDkzchcUAFxAlJFbvhbdrbY6O_b2955pYPrrDMePeQ/exec";
 
+    // Estrutura atualizada com os cenários e temas pré-definidos
     const configFases = {
-        "1": {
+        1: {
             titulo: "Fase 1: Laboratório de Clickbait",
-            desc: "Transformem uma informação chata no post mais apelativo possível usando a anatomia do engajamento.",
-            campos: ["Qual é a informação original (chata)?", "Qual o novo Título Clickbait?", "Qual emoção vocês tentaram engatilhar (Raiva, Medo, Humor)?", "O que teria na Imagem/Vídeo para prender a atenção?"]
+            desc: "O TÍTULO CHATO ORIGINAL:\n'Aviso: A prefeitura recomenda beber mais água devido à baixa umidade do ar.'\n\nA missão de vocês é reescrever esse título inofensivo e transformá-lo no post mais apelativo e viral possível, usando a anatomia do engajamento.",
+            campos: [
+                { label: "1. Qual o seu novo Título Clickbait?", linhas: 2 },
+                { label: "2. Qual emoção vocês tentaram engatilhar (Raiva, Medo, Curiosidade, Urgência)?", linhas: 1 },
+                { label: "3. O que teria na Imagem/Vídeo para prender a atenção?", linhas: 2 }
+            ]
         },
-        "2": {
+        2: {
             titulo: "Fase 2: Agência de Fact-Checking",
-            desc: "Desconstruam um post sensacionalista ou falso.",
-            campos: ["Qual o tema ou link do post analisado?", "Qual é a afirmação apelativa/falsa do post?", "Qual é o Fato Real?", "Qual tática o post usou para manipular? (Ex: tirou de contexto, foto falsa)"]
+            desc: "CASO EM ANÁLISE: O caso da 'Grávida de Taubaté' (2012).\nUma mulher usou uma barriga redonda de espuma e silicone, pintada e com umbigo falso, e foi a diversos programas de TV jurando estar grávida de quadrigêmeas. O Brasil inteiro acreditou e ela ganhou fraldas e dinheiro, até ser desmascarada.\n\nDesconstruam como o sensacionalismo ajudou a propagar isso.",
+            campos: [
+                { label: "1. Por que essa história viralizou tão rápido na época?", linhas: 2 },
+                { label: "2. Qual tática de manipulação emocional (da anatomia do post) foi usada para enganar as pessoas e a mídia?", linhas: 2 },
+                { label: "3. Se fosse hoje, como as redes sociais iriam impulsionar (ou desmascarar) esse caso?", linhas: 2 }
+            ]
         },
-        "3": {
+        3: {
             titulo: "Fase 3: Teste A/B",
-            desc: "Criem duas versões de post para o mesmo tema e avaliem a diferença.",
-            campos: ["Tema da Campanha", "Texto do Post A (Versão Ética e Informativa)", "Texto do Post B (Versão Viral e Apelativa)", "Por que o Algoritmo iria preferir o Post B?"]
+            desc: "O TEMA: A Feira de Ciências da Escola que vai acontecer neste sábado.\n\nVocês precisam criar duas versões de divulgação para competir pela atenção no algoritmo.",
+            campos: [
+                { label: "1. Texto do Post A (Versão Ética, Informativa, Direta e um pouco chata)", linhas: 3 },
+                { label: "2. Texto do Post B (Versão Viral, Apelativa, Polêmica ou Clickbait)", linhas: 3 },
+                { label: "3. Explique detalhadamente: Por que o Algoritmo inevitavelmente preferiria impulsionar o Post B?", linhas: 2 }
+            ]
         },
-        "4": {
+        4: {
             titulo: "Fase 4: Auditoria da Bolha",
-            desc: "Analisem o feed do celular de alguém do grupo.",
-            campos: ["Qual plataforma estão usando? (TikTok, Instagram, etc)", "Qual o tema principal do post analisado?", "Era um conteúdo patrocinado (Anúncio)?", "Qual gatilho usaram nos primeiros 3 segundos para reter atenção?"]
+            desc: "MISSÃO: Abram o TikTok, Reels ou Shorts no celular de alguém do grupo. Rolem o feed normalmente e anotem rigorosamente os 10 primeiros posts que aparecerem.",
+            campos: [
+                { label: "1. Qual plataforma estão usando? (TikTok, Reels, etc)", linhas: 1 },
+                { label: "2. Liste o @ do criador e o Tema dos 10 primeiros posts.\n(Exemplo: 1. @Zezinho - Games | 2. @Maria - Maquiagem...)", linhas: 8 },
+                { label: "3. Olhando para essa lista, qual padrão de interesses e qual emoção principal o algoritmo acha que o dono do celular tem?", linhas: 3 }
+            ]
         },
-        "5": {
+        5: {
             titulo: "Fase 5: Mapa da Toxicidade",
-            desc: "Analise como redes e jogos online lidam com comportamentos tóxicos.",
-            campos: ["Qual Jogo ou App de comunicação estão analisando?", "Qual o comportamento tóxico observado? (Griefing, xingamento, etc)", "O jogo/comunidade puniu ou impulsionou a briga?", "Proponha 1 regra técnica para diminuir isso no jogo."]
+            desc: "CENÁRIO EM UMA PANELA DE DISCORD:\nUm jogador novato entra no servidor da turma para jogar Valorant, mas não sabe as regras direito e joga mal. Dois veteranos de uma 'panela' (grupo fechado) começam a xingá-lo no chat de voz e fazem figurinhas e memes humilhando o novato no chat de texto. Outros membros dão upvotes (reações de risada) nos memes. Os moderadores estão offline. O novato desinstala o jogo e sai do servidor.",
+            campos: [
+                { label: "1. Qual foi o gatilho da toxicidade? Por que a 'panela' se sentiu à vontade para humilhar o novato?", linhas: 2 },
+                { label: "2. Como as ferramentas do app (anonimato, reações rápidas de emoji, cultura de grupo) pioraram o problema?", linhas: 2 },
+                { label: "3. Proponham 2 regras práticas no design do servidor (cargos, automoderação, limites) para evitar que isso se repita.", linhas: 3 }
+            ]
         }
     };
 
-    let dadosAtuais = {};
+    let dadosAtuais = { grupo: "", integrantes: "", fase: 1 };
 
-    function iniciarMissao() {
-        const grupo = document.getElementById("input-grupo").value;
-        const integrantes = document.getElementById("input-integrantes").value;
-        const fase = document.getElementById("select-fase").value;
+    // Ao carregar a página, checa se tem progresso salvo no navegador
+    window.onload = function() {
+        if(localStorage.getItem('anatomia_grupo')) {
+            document.getElementById('input-grupo').value = localStorage.getItem('anatomia_grupo');
+            document.getElementById('input-integrantes').value = localStorage.getItem('anatomia_integrantes');
+            
+            let faseSalva = parseInt(localStorage.getItem('anatomia_fase'));
+            if(faseSalva >= 1 && faseSalva <= 5) {
+                document.getElementById('select-fase').value = faseSalva;
+                document.getElementById('btn-iniciar').innerText = `Continuar da Fase ${faseSalva}`;
+            } else if (faseSalva > 5) {
+                document.getElementById('select-fase').value = 1;
+            }
+        }
+    }
+
+    function iniciarOuRetomar() {
+        const grupo = document.getElementById("input-grupo").value.trim();
+        const integrantes = document.getElementById("input-integrantes").value.trim();
+        const faseSelecionada = parseInt(document.getElementById("select-fase").value);
 
         if(!grupo || !integrantes) {
-            alert("Por favor, preencha o nome do grupo e integrantes.");
+            alert("⚠️ Por favor, preencha o nome do grupo e integrantes para registrar as respostas.");
             return;
         }
 
-        dadosAtuais = { grupo, integrantes, fase };
+        // Salva os dados localmente
+        dadosAtuais = { grupo, integrantes, fase: faseSelecionada };
+        localStorage.setItem('anatomia_grupo', grupo);
+        localStorage.setItem('anatomia_integrantes', integrantes);
+        localStorage.setItem('anatomia_fase', faseSelecionada);
         
+        carregarInterfaceDaFase();
+    }
+
+    function carregarInterfaceDaFase() {
         document.getElementById("tela-login").classList.add("hidden");
         document.getElementById("tela-missao").classList.remove("hidden");
         
-        const config = configFases[fase];
+        const config = configFases[dadosAtuais.fase];
+        
+        // Atualiza UI
         document.getElementById("titulo-missao").innerText = config.titulo;
         document.getElementById("desc-missao").innerText = config.desc;
+        document.getElementById("barra-progresso").style.width = (dadosAtuais.fase * 20) + "%";
 
+        // Muda texto do botão na última fase
+        const btnEnviar = document.getElementById("btn-enviar");
+        if(dadosAtuais.fase === 5) {
+            btnEnviar.innerText = "Finalizar Missão e Enviar!";
+            btnEnviar.style.backgroundColor = "#e67e22";
+        } else {
+            btnEnviar.innerText = "Enviar e Avançar para a Fase " + (dadosAtuais.fase + 1);
+            btnEnviar.style.backgroundColor = "#2980b9";
+        }
+        btnEnviar.disabled = false;
+
+        // Gera os campos dinamicamente
         const containerCampos = document.getElementById("campos-dinamicos");
         containerCampos.innerHTML = "";
         
-        config.campos.forEach((pergunta, index) => {
+        config.campos.forEach((campo, index) => {
             containerCampos.innerHTML += `
                 <div class="form-group">
-                    <label>${pergunta}</label>
-                    <textarea id="resposta_${index + 1}" rows="2" placeholder="Digite aqui..."></textarea>
+                    <label>${campo.label}</label>
+                    <textarea id="resposta_${index + 1}" rows="${campo.linhas}" placeholder="Digite a resposta da equipe aqui..."></textarea>
                 </div>
             `;
         });
     }
 
-    function enviarDados() {
-        document.getElementById("btn-enviar").innerText = "Enviando...";
+    function enviarDadosEAvancar() {
+        const btn = document.getElementById("btn-enviar");
+        btn.innerText = "Transmitindo dados ao servidor... Aguarde";
+        btn.disabled = true;
         
+        // Monta o pacote de dados a ser enviado à planilha
         const payload = {
             grupo: dadosAtuais.grupo,
             integrantes: dadosAtuais.integrantes,
@@ -140,21 +221,49 @@
             resposta_1: document.getElementById("resposta_1")?.value || "",
             resposta_2: document.getElementById("resposta_2")?.value || "",
             resposta_3: document.getElementById("resposta_3")?.value || "",
-            resposta_4: document.getElementById("resposta_4")?.value || ""
+            resposta_4: document.getElementById("resposta_4")?.value || "" // Backup
         };
 
+        // Envia para o Google Apps Script
         fetch(PLANILHA_URL, {
             method: "POST",
             mode: "no-cors",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         }).then(() => {
-            document.getElementById("tela-missao").classList.add("hidden");
-            document.getElementById("mensagem-sucesso").classList.remove("hidden");
+            // Avança a fase
+            dadosAtuais.fase++;
+            localStorage.setItem('anatomia_fase', dadosAtuais.fase);
+            
+            // Rola para o topo
+            window.scrollTo(0, 0);
+
+            if (dadosAtuais.fase > 5) {
+                // Terminou tudo
+                document.getElementById("tela-missao").classList.add("hidden");
+                document.getElementById("mensagem-sucesso").classList.remove("hidden");
+            } else {
+                // Carrega a próxima fase automaticamente
+                carregarInterfaceDaFase();
+            }
         }).catch(err => {
-            alert("Erro ao enviar. Tentem novamente.");
-            document.getElementById("btn-enviar").innerText = "Tentar Novamente";
+            alert("⚠️ Erro de conexão. Verifiquem a internet e tentem novamente.");
+            btn.innerText = dadosAtuais.fase === 5 ? "Finalizar Missão e Enviar!" : "Enviar e Avançar para a Fase " + (dadosAtuais.fase + 1);
+            btn.disabled = false;
         });
+    }
+
+    function voltarParaLogin() {
+        document.getElementById("tela-missao").classList.add("hidden");
+        document.getElementById("tela-login").classList.remove("hidden");
+        
+        // Atualiza a select box com a fase atual salva para não perder progresso
+        document.getElementById("select-fase").value = dadosAtuais.fase;
+    }
+
+    function limparEReiniciar() {
+        localStorage.clear();
+        location.reload();
     }
 </script>
 
