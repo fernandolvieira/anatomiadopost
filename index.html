@@ -31,7 +31,7 @@
 <body>
 
 <div class="container">
-    <h1>🧠 Hackeando o Algoritmo</h1>
+    <h1>🧠 Hackeando o Algoritmo 2.0</h1>
     
     <div id="tela-login">
         <p style="text-align:center;">Identifiquem a equipe. Se fecharem a aba, basta selecionar a fase de onde pararam.</p>
@@ -77,26 +77,11 @@
     </div>
 </div>
 
-<!-- ==========================================
-     O SEGREDO: O Formulário Oculto (Anti-bloqueio)
-     ========================================== -->
-<iframe name="iframe_oculto" id="iframe_oculto" style="display:none;" onload="finalizarEnvio()"></iframe>
-
-<form id="form_invisivel" method="POST" target="iframe_oculto" style="display:none;">
-    <input type="hidden" name="grupo" id="form_grupo">
-    <input type="hidden" name="integrantes" id="form_integrantes">
-    <input type="hidden" name="fase" id="form_fase">
-    <input type="hidden" name="resposta_1" id="form_r1">
-    <input type="hidden" name="resposta_2" id="form_r2">
-    <input type="hidden" name="resposta_3" id="form_r3">
-    <input type="hidden" name="resposta_4" id="form_r4">
-</form>
-
 <script>
-    // Link atualizado recebido
-    const PLANILHA_URL = "https://script.google.com/macros/s/AKfycbwfoXIuFfnhbYNEz5UFrySgAz7Xms-DXp3E-kZNRPmg4mwe_qVlhKysJLcSN-mfIWhIpw/exec";
+    // Link configurado!
+    var PLANILHA_URL = "https://script.google.com/macros/s/AKfycbwfoXIuFfnhbYNEz5UFrySgAz7Xms-DXp3E-kZNRPmg4mwe_qVlhKysJLcSN-mfIWhIpw/exec";
 
-    const configFases = {
+    var configFases = {
         1: {
             titulo: "Fase 1: Laboratório de Clickbait",
             desc: "O TÍTULO CHATO ORIGINAL:\n'Aviso: A prefeitura recomenda beber mais água devido à baixa umidade do ar.'\n\nReescreva esse título e transforme-o no post mais apelativo e viral possível.",
@@ -144,17 +129,16 @@
         }
     };
 
-    let dadosAtuais = { grupo: "", integrantes: "", fase: 1 };
-    let envioEmAndamento = false;
+    var dadosAtuais = { grupo: "", integrantes: "", fase: 1 };
 
     window.onload = function() {
         if(localStorage.getItem('anatomia_grupo')) {
             document.getElementById('input-grupo').value = localStorage.getItem('anatomia_grupo');
             document.getElementById('input-integrantes').value = localStorage.getItem('anatomia_integrantes');
-            let faseSalva = parseInt(localStorage.getItem('anatomia_fase'));
+            var faseSalva = parseInt(localStorage.getItem('anatomia_fase'));
             if(faseSalva >= 1 && faseSalva <= 5) {
                 document.getElementById('select-fase').value = faseSalva;
-                document.getElementById('btn-iniciar').innerText = `Continuar da Fase ${faseSalva}`;
+                document.getElementById('btn-iniciar').innerText = "Continuar da Fase " + faseSalva;
             } else if (faseSalva > 5) {
                 document.getElementById('select-fase').value = 1;
             }
@@ -162,16 +146,16 @@
     }
 
     function iniciarOuRetomar() {
-        const grupo = document.getElementById("input-grupo").value.trim();
-        const integrantes = document.getElementById("input-integrantes").value.trim();
-        const faseSelecionada = parseInt(document.getElementById("select-fase").value);
+        var grupo = document.getElementById("input-grupo").value.trim();
+        var integrantes = document.getElementById("input-integrantes").value.trim();
+        var faseSelecionada = parseInt(document.getElementById("select-fase").value);
 
         if(!grupo || !integrantes) {
             alert("⚠️ Preencha o nome do grupo e integrantes.");
             return;
         }
 
-        dadosAtuais = { grupo, integrantes, fase: faseSelecionada };
+        dadosAtuais = { grupo: grupo, integrantes: integrantes, fase: faseSelecionada };
         localStorage.setItem('anatomia_grupo', grupo);
         localStorage.setItem('anatomia_integrantes', integrantes);
         localStorage.setItem('anatomia_fase', faseSelecionada);
@@ -183,12 +167,12 @@
         document.getElementById("tela-login").classList.add("hidden");
         document.getElementById("tela-missao").classList.remove("hidden");
         
-        const config = configFases[dadosAtuais.fase];
+        var config = configFases[dadosAtuais.fase];
         document.getElementById("titulo-missao").innerText = config.titulo;
         document.getElementById("desc-missao").innerText = config.desc;
         document.getElementById("barra-progresso").style.width = (dadosAtuais.fase * 20) + "%";
 
-        const btnEnviar = document.getElementById("btn-enviar");
+        var btnEnviar = document.getElementById("btn-enviar");
         if(dadosAtuais.fase === 5) {
             btnEnviar.innerText = "Finalizar Missão e Enviar!";
             btnEnviar.style.backgroundColor = "#e67e22";
@@ -198,58 +182,69 @@
         }
         btnEnviar.disabled = false;
 
-        const containerCampos = document.getElementById("campos-dinamicos");
+        var containerCampos = document.getElementById("campos-dinamicos");
         containerCampos.innerHTML = "";
         
-        config.campos.forEach((campo, index) => {
-            containerCampos.innerHTML += `
-                <div class="form-group">
-                    <label>${campo.label}</label>
-                    <textarea id="resposta_${index + 1}" rows="${campo.linhas}" placeholder="Digite a resposta aqui..."></textarea>
-                </div>
-            `;
+        // Renderiza apenas os campos necessários (3 ou 4)
+        config.campos.forEach(function(campo, index) {
+            var htmlCampo = '<div class="form-group">' +
+                            '<label>' + campo.label + '</label>' +
+                            '<textarea id="resposta_' + (index + 1) + '" rows="' + campo.linhas + '" placeholder="Digite a resposta aqui..."></textarea>' +
+                            '</div>';
+            containerCampos.innerHTML += htmlCampo;
         });
     }
 
+    // Função de segurança que pega o valor sem travar o código se o campo não existir
+    function pegarValorSeguro(id) {
+        var campo = document.getElementById(id);
+        if (campo) {
+            return campo.value;
+        } else {
+            return "";
+        }
+    }
+
     function enviarDadosEAvancar() {
-        const btn = document.getElementById("btn-enviar");
+        var btn = document.getElementById("btn-enviar");
         btn.innerText = "Gravando na planilha... Aguarde";
         btn.disabled = true;
         
-        // 1. Preenche o formulário invisível
-        document.getElementById("form_invisivel").action = PLANILHA_URL;
-        document.getElementById("form_grupo").value = dadosAtuais.grupo;
-        document.getElementById("form_integrantes").value = dadosAtuais.integrantes;
-        document.getElementById("form_fase").value = configFases[dadosAtuais.fase].titulo;
-        document.getElementById("form_r1").value = document.getElementById("resposta_1")?.value || "";
-        document.getElementById("form_r2").value = document.getElementById("resposta_2")?.value || "";
-        document.getElementById("form_r3").value = document.getElementById("resposta_3")?.value || "";
-        document.getElementById("form_r4").value = document.getElementById("resposta_4")?.value || "";
+        // Empacota os dados garantindo que não trava se faltar a resposta 4
+        var payload = new URLSearchParams();
+        payload.append("grupo", dadosAtuais.grupo);
+        payload.append("integrantes", dadosAtuais.integrantes);
+        payload.append("fase", configFases[dadosAtuais.fase].titulo);
+        payload.append("resposta_1", pegarValorSeguro("resposta_1"));
+        payload.append("resposta_2", pegarValorSeguro("resposta_2"));
+        payload.append("resposta_3", pegarValorSeguro("resposta_3"));
+        payload.append("resposta_4", pegarValorSeguro("resposta_4")); // Se não tiver a pergunta 4, manda em branco.
 
-        // 2. Avisa ao sistema que o envio começou e aperta o botão do formulário
-        envioEmAndamento = true;
-        document.getElementById("form_invisivel").submit();
-        
-        // Timeout de segurança: Se o Iframe não avisar em 5 segundos, avança mesmo assim
-        setTimeout(() => {
-            if(envioEmAndamento) { finalizarEnvio(); }
-        }, 5000);
-    }
+        fetch(PLANILHA_URL, {
+            method: "POST",
+            body: payload,
+            mode: "no-cors" // Evita o bloqueio do navegador
+        }).then(function() {
+            // Avança para a próxima fase
+            dadosAtuais.fase++;
+            localStorage.setItem('anatomia_fase', dadosAtuais.fase);
+            window.scrollTo(0, 0);
 
-    function finalizarEnvio() {
-        if(!envioEmAndamento) return; // Evita que rode duas vezes
-        envioEmAndamento = false;
-
-        dadosAtuais.fase++;
-        localStorage.setItem('anatomia_fase', dadosAtuais.fase);
-        window.scrollTo(0, 0);
-
-        if (dadosAtuais.fase > 5) {
-            document.getElementById("tela-missao").classList.add("hidden");
-            document.getElementById("mensagem-sucesso").classList.remove("hidden");
-        } else {
-            carregarInterfaceDaFase();
-        }
+            if (dadosAtuais.fase > 5) {
+                document.getElementById("tela-missao").classList.add("hidden");
+                document.getElementById("mensagem-sucesso").classList.remove("hidden");
+            } else {
+                carregarInterfaceDaFase();
+            }
+        }).catch(function(err) {
+            alert("⚠️ Erro de conexão. Tente enviar novamente.");
+            if (dadosAtuais.fase === 5) {
+                btn.innerText = "Finalizar Missão e Enviar!";
+            } else {
+                btn.innerText = "Enviar e Avançar para a Fase " + (dadosAtuais.fase + 1);
+            }
+            btn.disabled = false;
+        });
     }
 
     function voltarParaLogin() {
