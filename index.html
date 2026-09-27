@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratório: Anatomia do Post</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2 { color: #2c3e50; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"], textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { display: block; width: 100%; padding: 12px; background-color: #2980b9; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        button:hover { background-color: #3498db; }
+        .hidden { display: none; }
+        #mensagem-sucesso { text-align: center; color: #27ae60; font-weight: bold; margin-top: 20px; padding: 20px; background: #eafaf1; border-radius: 5px;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧠 Hackeando o Algoritmo</h1>
+    
+    <!-- Tela 1: Identificação -->
+    <div id="tela-login">
+        <p style="text-align:center;">Bem-vindos à central de análise. Identifiquem sua equipe para começar a missão.</p>
+        <div class="form-group">
+            <label>Nome do Grupo:</label>
+            <input type="text" id="input-grupo" placeholder="Ex: Esquadrão Cyber">
+        </div>
+        <div class="form-group">
+            <label>Nomes dos Integrantes:</label>
+            <input type="text" id="input-integrantes" placeholder="João, Maria e Pedro">
+        </div>
+        <div class="form-group">
+            <label>Selecione a Missão:</label>
+            <select id="select-fase">
+                <option value="1">Fase 1: Laboratório de Clickbait</option>
+                <option value="2">Fase 2: Fact-Checking</option>
+                <option value="3">Fase 3: Teste A/B</option>
+                <option value="4">Fase 4: Auditoria da Bolha</option>
+                <option value="5">Fase 5: Mapa da Toxicidade</option>
+            </select>
+        </div>
+        <button onclick="iniciarMissao()">Iniciar Missão</button>
+    </div>
+
+    <!-- Tela 2: A Missão (Gerada Dinamicamente) -->
+    <div id="tela-missao" class="hidden">
+        <h2 id="titulo-missao">Fase</h2>
+        <p id="desc-missao"></p>
+        
+        <div id="campos-dinamicos"></div>
+        
+        <button id="btn-enviar" onclick="enviarDados()">Enviar Relatório para o Servidor</button>
+    </div>
+
+    <!-- Tela 3: Sucesso -->
+    <div id="mensagem-sucesso" class="hidden">
+        <h3>🚀 Dados enviados com sucesso!</h3>
+        <p>Acesse a planilha da turma para ver os resultados.</p>
+        <button onclick="location.reload()">Fazer nova análise</button>
+    </div>
+</div>
+
+<script>
+    // Link do Apps Script configurado
+    const PLANILHA_URL = "https://script.google.com/macros/s/AKfycbzqRx0Zv-7hCUXhnDtcK7sfbjbORDkzchcUAFxAlJFbvhbdrbY6O_b2955pYPrrDMePeQ/exec";
+
+    const configFases = {
+        "1": {
+            titulo: "Fase 1: Laboratório de Clickbait",
+            desc: "Transformem uma informação chata no post mais apelativo possível usando a anatomia do engajamento.",
+            campos: ["Qual é a informação original (chata)?", "Qual o novo Título Clickbait?", "Qual emoção vocês tentaram engatilhar (Raiva, Medo, Humor)?", "O que teria na Imagem/Vídeo para prender a atenção?"]
+        },
+        "2": {
+            titulo: "Fase 2: Agência de Fact-Checking",
+            desc: "Desconstruam um post sensacionalista ou falso.",
+            campos: ["Qual o tema ou link do post analisado?", "Qual é a afirmação apelativa/falsa do post?", "Qual é o Fato Real?", "Qual tática o post usou para manipular? (Ex: tirou de contexto, foto falsa)"]
+        },
+        "3": {
+            titulo: "Fase 3: Teste A/B",
+            desc: "Criem duas versões de post para o mesmo tema e avaliem a diferença.",
+            campos: ["Tema da Campanha", "Texto do Post A (Versão Ética e Informativa)", "Texto do Post B (Versão Viral e Apelativa)", "Por que o Algoritmo iria preferir o Post B?"]
+        },
+        "4": {
+            titulo: "Fase 4: Auditoria da Bolha",
+            desc: "Analisem o feed do celular de alguém do grupo.",
+            campos: ["Qual plataforma estão usando? (TikTok, Instagram, etc)", "Qual o tema principal do post analisado?", "Era um conteúdo patrocinado (Anúncio)?", "Qual gatilho usaram nos primeiros 3 segundos para reter atenção?"]
+        },
+        "5": {
+            titulo: "Fase 5: Mapa da Toxicidade",
+            desc: "Analise como redes e jogos online lidam com comportamentos tóxicos.",
+            campos: ["Qual Jogo ou App de comunicação estão analisando?", "Qual o comportamento tóxico observado? (Griefing, xingamento, etc)", "O jogo/comunidade puniu ou impulsionou a briga?", "Proponha 1 regra técnica para diminuir isso no jogo."]
+        }
+    };
+
+    let dadosAtuais = {};
+
+    function iniciarMissao() {
+        const grupo = document.getElementById("input-grupo").value;
+        const integrantes = document.getElementById("input-integrantes").value;
+        const fase = document.getElementById("select-fase").value;
+
+        if(!grupo || !integrantes) {
+            alert("Por favor, preencha o nome do grupo e integrantes.");
+            return;
+        }
+
+        dadosAtuais = { grupo, integrantes, fase };
+        
+        document.getElementById("tela-login").classList.add("hidden");
+        document.getElementById("tela-missao").classList.remove("hidden");
+        
+        const config = configFases[fase];
+        document.getElementById("titulo-missao").innerText = config.titulo;
+        document.getElementById("desc-missao").innerText = config.desc;
+
+        const containerCampos = document.getElementById("campos-dinamicos");
+        containerCampos.innerHTML = "";
+        
+        config.campos.forEach((pergunta, index) => {
+            containerCampos.innerHTML += `
+                <div class="form-group">
+                    <label>${pergunta}</label>
+                    <textarea id="resposta_${index + 1}" rows="2" placeholder="Digite aqui..."></textarea>
+                </div>
+            `;
+        });
+    }
+
+    function enviarDados() {
+        document.getElementById("btn-enviar").innerText = "Enviando...";
+        
+        const payload = {
+            grupo: dadosAtuais.grupo,
+            integrantes: dadosAtuais.integrantes,
+            fase: configFases[dadosAtuais.fase].titulo,
+            resposta_1: document.getElementById("resposta_1")?.value || "",
+            resposta_2: document.getElementById("resposta_2")?.value || "",
+            resposta_3: document.getElementById("resposta_3")?.value || "",
+            resposta_4: document.getElementById("resposta_4")?.value || ""
+        };
+
+        fetch(PLANILHA_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            document.getElementById("tela-missao").classList.add("hidden");
+            document.getElementById("mensagem-sucesso").classList.remove("hidden");
+        }).catch(err => {
+            alert("Erro ao enviar. Tentem novamente.");
+            document.getElementById("btn-enviar").innerText = "Tentar Novamente";
+        });
+    }
+</script>
+
+</body>
+</html>
